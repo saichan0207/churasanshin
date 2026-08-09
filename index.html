@@ -215,6 +215,8 @@
   @media(max-width:760px){.vid-grid{grid-template-columns:1fr}}
   .yt{position:relative;aspect-ratio:16/9;border-radius:18px;overflow:hidden;background:var(--sea-soft);
       box-shadow:0 14px 34px rgba(2,137,163,.16);cursor:pointer}
+  /* 音源と動画を縦に並べたとき、くっついて見えないよう間を空ける（2026-08-09） */
+  .player:not([hidden]) + .yt{margin-top:26px}
   .yt img{width:100%;height:100%;object-fit:cover;display:block}
   .yt iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
   .yt .play{position:absolute;inset:0;display:grid;place-items:center;background:rgba(4,98,119,.28);
@@ -983,10 +985,10 @@
       if(!box||!a||!btn||!bar||!fill||!tm) return;
       a.src = src;
       box.removeAttribute("hidden");
-      var yt = box.parentNode.querySelector(".yt");
-      if(yt) yt.setAttribute("hidden","");                 // 音源があるときは動画を出さない
-      var vc = box.parentNode.querySelector(".vid-cap");
-      if(vc) vc.setAttribute("hidden","");                 // 動画用の説明文も一緒に下げる
+      // 2026-08-09 変更：以前は音源があると動画を隠していたが、
+      // 金城様が演奏動画の差し替えをご依頼くださったのに画面に出ない状態だったため、
+      // 音源と動画を縦に並べて両方出すことにした。
+      // （どちらも自動再生はしないので、音が重なる心配はない）
       var art = box.querySelector(".art");                 // ジャケット写真が無ければ枠ごと出さない
       if(art && !(map["listen_art"]||"").trim()) art.remove();
       var sec = box.closest("section"); if(sec) sec.removeAttribute("hidden");
