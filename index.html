@@ -36,8 +36,22 @@
   body{font-family:"Hiragino Sans","Yu Gothic",sans-serif;background:var(--paper);color:var(--ink);line-height:1.95;letter-spacing:.045em;overflow-x:hidden}
   .mincho{font-family:"Hiragino Mincho ProN","Yu Mincho",serif}
 
-  header{position:sticky;top:var(--bar-h,34px);z-index:40;display:flex;justify-content:space-between;align-items:center;padding:15px 26px;background:rgba(254,251,244,0);transition:background .4s,box-shadow .4s,padding .4s}
-  header.scrolled{background:rgba(254,251,244,.95);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 1px 0 var(--line);padding:11px 26px}
+  /* 2026-08-17 金城様よりご指摘「スマホで開くとバグる」→ 原因は次の2点だった。
+     ① top が var(--bar-h,34px) だった。--bar-h はこのページのどこにも定義がなく、
+        見本ページに付ける上部の帯（sample-bar）の高さを指すための変数だった。
+        お客様のサイトにその帯は無いので、画面の上端に【34pxの透明な隙間】だけが残り、
+        スクロール中の本文がその隙間を通り抜けて、教室名に重なって見えていた。
+        → top:0 にして、ヘッダーを画面の上端にぴったり貼り付ける。
+     ② 背景が rgba(...,.95)＋backdrop-filter だった。iPhoneのSafariでは
+        position:sticky と backdrop-filter の組み合わせが効かないことがあり、
+        効かないと「5%透けたただの帯」になって、やはり文字が透ける。
+        → 不透明な背景を土台に置き、ぼかしは【効く環境だけの飾り】に格下げする。 */
+  header{position:sticky;top:0;z-index:40;display:flex;justify-content:space-between;align-items:center;padding:15px 26px;background:rgba(254,251,244,0);transition:background .4s,box-shadow .4s,padding .4s}
+  header.scrolled{background:#FEFBF4;box-shadow:0 1px 0 var(--line);padding:11px 26px}
+  /* ぼかしが確実に効く環境でだけ、すりガラス風にする（効かない環境は上の不透明のまま） */
+  @supports ((backdrop-filter:blur(10px)) or (-webkit-backdrop-filter:blur(10px))){
+    header.scrolled{background:rgba(254,251,244,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  }
   .logo{font-size:19px;letter-spacing:.16em;color:var(--sea-d);font-weight:700;transition:color .4s,text-shadow .4s}
   .logo small{display:block;font-size:9px;letter-spacing:.3em;color:var(--coral);margin-top:3px;font-weight:600;transition:color .4s}
   /* ヒーローの海に重なる間は白抜き。背景が明るいので、下ろすと読めなくなる */
@@ -90,7 +104,11 @@
   .bloom svg{width:100%;height:100%;display:block}
   .sec-head{text-align:center;margin-bottom:50px}
   .sec-head .en{font-size:11px;letter-spacing:.34em;color:var(--coral);display:block;margin-bottom:12px}
-  .sec-head h2{font-size:clamp(23px,3.4vw,31px);font-weight:600;letter-spacing:.07em;color:var(--sea-d)}
+  /* 2026-08-17 スマホで見出しの最後の1文字だけが次の行に落ちていた
+     （例：「こんな方を、お待ちしていま／す」）。行の長さを均して防ぐ。
+     text-wrap に対応していない端末では、これまでどおりの折り返しになるだけで崩れない。 */
+  .sec-head h2{font-size:clamp(23px,3.4vw,31px);font-weight:600;letter-spacing:.07em;color:var(--sea-d);
+    text-wrap:balance;overflow-wrap:anywhere}
   .sec-head p{margin-top:13px;font-size:14px;color:var(--sub)}
 
   /* 重要：中身を隠すのは JS が動いているときだけ。
